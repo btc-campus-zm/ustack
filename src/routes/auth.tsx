@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { ShieldCheck, Bitcoin, ArrowLeft, Fingerprint, ChevronRight } from "lucide-react";
+import { ShieldCheck, Bitcoin, ArrowLeft, Fingerprint, ChevronRight, Vault } from "lucide-react";
 import { PhoneFrame } from "@/components/ustack/PhoneFrame";
 import { Logo } from "@/components/ustack/Logo";
 import { requestOtp, verifyOtp } from "@/lib/api/auth.functions";
@@ -116,7 +116,7 @@ function Auth() {
                   {[
                     { icon: ShieldCheck, label: "Secure" },
                     { icon: Bitcoin, label: "Bitcoin only" },
-                    { icon: Fingerprint, label: "Biometric" },
+                    { icon: Vault, label: "Safes" },
                   ].map(({ icon: Icon, label }) => (
                     <div key={label} className="glass rounded-2xl p-3 flex flex-col items-center gap-1.5">
                       <Icon className="w-4 h-4 text-[oklch(0.78_0.14_190)]" />
