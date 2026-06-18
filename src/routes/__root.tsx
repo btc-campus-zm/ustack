@@ -12,6 +12,7 @@ import { AuthProvider } from "@/lib/context/auth-context";
 import { CurrencyProvider } from "@/lib/currency-context";
 import { LockProvider } from "@/lib/context/lock-context";
 import { LockScreen } from "@/components/ustack/LockScreen";
+import { VerifyModal } from "@/components/ustack/VerifyModal";
 
 import appCss from "../styles.css?url";
 
@@ -124,6 +125,7 @@ function RootComponent() {
             <LockProvider>
               <Outlet />
               <LockScreen />
+              <VerifyModal />
             </LockProvider>
           </AuthProvider>
         </QueryClientProvider>

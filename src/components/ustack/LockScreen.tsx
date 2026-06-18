@@ -2,10 +2,12 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Fingerprint, Delete, KeyRound } from "lucide-react";
 import { useLock, verifyBiometric, PIN_LENGTH } from "@/lib/context/lock-context";
+import { useAuth } from "@/lib/context/auth-context";
 
 type View = "fingerprint" | "pin";
 
 export function LockScreen() {
+  const { isAuthenticated } = useAuth();
   const {
     isLocked,
     hasPin,
@@ -91,7 +93,8 @@ export function LockScreen() {
     else setPin((p) => (p.length < PIN_LENGTH ? p + d : p));
   };
 
-  if (!isLocked || !hasPin) return null;
+  // Only block the app when the user is already logged in
+  if (!isAuthenticated || !isLocked || !hasPin) return null;
 
   return (
     <AnimatePresence>

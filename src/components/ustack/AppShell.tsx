@@ -19,6 +19,7 @@ import { HelpSheet } from "./sheets/HelpSheet";
 import { EditProfileSheet } from "./sheets/EditProfileSheet";
 import { SecuritySheet } from "./sheets/SecuritySheet";
 import { useAuth } from "@/lib/context/auth-context";
+import { useLock } from "@/lib/context/lock-context";
 import { useBtcPrice } from "@/lib/hooks/useAppData";
 import type { Vault } from "@/lib/ustack-data";
 
@@ -39,6 +40,7 @@ export type SheetKind =
 export function AppShell() {
   const nav = useNavigate();
   const { isAuthenticated, loading, logout: authLogout } = useAuth();
+  const { requestVerification } = useLock();
   const [tab, setTab] = useState<Tab>("home");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sheet, setSheet] = useState<SheetKind>(null);
@@ -63,9 +65,20 @@ export function AppShell() {
     setDepositVault(vault ?? null);
     setSheet("deposit");
   };
+
   const openWithdraw = (vault?: Vault) => {
-    setWithdrawVault(vault ?? null);
-    setSheet("withdraw");
+    requestVerification("Confirm withdrawal", () => {
+      setWithdrawVault(vault ?? null);
+      setSheet("withdraw");
+    });
+  };
+
+  const openSettings = () => {
+    requestVerification("Access settings", () => setSheet("settings"));
+  };
+
+  const openEditProfile = () => {
+    requestVerification("Edit profile", () => setSheet("editProfile"));
   };
 
   // Alert theme: price dropped past the platform 2% threshold
@@ -80,7 +93,7 @@ export function AppShell() {
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}
           onSelect={(t) => { setTab(t); setDrawerOpen(false); }}
-          onSettings={() => { setDrawerOpen(false); setSheet("settings"); }}
+          onSettings={() => { setDrawerOpen(false); openSettings(); }}
           onHelp={() => { setDrawerOpen(false); setSheet("help"); }}
           onLogout={logout}
         />
@@ -119,8 +132,8 @@ export function AppShell() {
                   {tab === "activity" && <ActivityScreen />}
                   {tab === "profile" && (
                     <ProfileScreen
-                      onEdit={() => setSheet("editProfile")}
-                      onSettings={() => setSheet("settings")}
+                      onEdit={openEditProfile}
+                      onSettings={openSettings}
                       onHelp={() => setSheet("help")}
                       onLogout={logout}
                     />

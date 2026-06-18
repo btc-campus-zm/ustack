@@ -5,7 +5,7 @@ const BIOMETRICS_KEY = "ustack_biometrics";
 const CREDENTIAL_ID_KEY = "ustack_cred_id";
 const LAST_UNLOCK_KEY = "ustack_last_unlock";
 const FRESH_LOGIN_KEY = "ustack_fresh_login";
-const LOCK_TIMEOUT_MS = 60_000; // lock after 60s in background
+const LOCK_TIMEOUT_MS = 60_000;
 
 export const PIN_LENGTH = 4;
 
@@ -75,13 +75,20 @@ export async function verifyBiometric(): Promise<boolean> {
   }
 }
 
-// ── Lock context ──────────────────────────────────────────────────────────────
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+export interface VerificationRequest {
+  label: string;
+  onSuccess: () => void;
+  onCancel?: () => void;
+}
 
 interface LockContextValue {
   isLocked: boolean;
   hasPin: boolean;
   biometricsEnabled: boolean;
   hasBiometricCredential: boolean;
+  verificationRequest: VerificationRequest | null;
   unlock: () => void;
   lock: () => void;
   markFreshLogin: () => void;
@@ -90,6 +97,9 @@ interface LockContextValue {
   clearPin: () => void;
   setBiometrics: (v: boolean) => void;
   setBiometricCredential: (v: boolean) => void;
+  requestVerification: (label: string, onSuccess: () => void, onCancel?: () => void) => void;
+  resolveVerification: () => void;
+  cancelVerification: () => void;
 }
 
 const LockContext = createContext<LockContextValue>({
@@ -97,6 +107,7 @@ const LockContext = createContext<LockContextValue>({
   hasPin: false,
   biometricsEnabled: false,
   hasBiometricCredential: false,
+  verificationRequest: null,
   unlock: () => {},
   lock: () => {},
   markFreshLogin: () => {},
@@ -105,6 +116,9 @@ const LockContext = createContext<LockContextValue>({
   clearPin: () => {},
   setBiometrics: () => {},
   setBiometricCredential: () => {},
+  requestVerification: (_label, onSuccess) => onSuccess(),
+  resolveVerification: () => {},
+  cancelVerification: () => {},
 });
 
 export function LockProvider({ children }: { children: React.ReactNode }) {
@@ -112,25 +126,27 @@ export function LockProvider({ children }: { children: React.ReactNode }) {
   const [hasPin, setHasPin] = useState(false);
   const [biometricsEnabled, setBiometricsEnabled] = useState(false);
   const [hasBiometricCredential, setHasBiometricCredential] = useState(false);
+  const [verificationRequest, setVerificationRequest] = useState<VerificationRequest | null>(null);
   const hiddenAt = useRef<number | null>(null);
+  const hasPinRef = useRef(false);
 
   useEffect(() => {
     const pin = localStorage.getItem(PIN_KEY) ?? "";
     const bio = localStorage.getItem(BIOMETRICS_KEY) === "true";
     const cred = !!localStorage.getItem(CREDENTIAL_ID_KEY);
-    setHasPin(pin.length === PIN_LENGTH);
+    const pinSet = pin.length === PIN_LENGTH;
+    setHasPin(pinSet);
+    hasPinRef.current = pinSet;
     setBiometricsEnabled(bio);
     setHasBiometricCredential(cred);
 
-    // On mount — show lock if PIN is set and this isn't a fresh login
     const freshLogin = sessionStorage.getItem(FRESH_LOGIN_KEY);
-    if (pin.length === PIN_LENGTH && !freshLogin) {
+    if (pinSet && !freshLogin) {
       setIsLocked(true);
     }
     sessionStorage.removeItem(FRESH_LOGIN_KEY);
   }, []);
 
-  // Re-lock when returning from background
   useEffect(() => {
     const onVisibility = () => {
       if (document.visibilityState === "hidden") {
@@ -163,12 +179,15 @@ export function LockProvider({ children }: { children: React.ReactNode }) {
 
   const setPin = useCallback((pin: string) => {
     localStorage.setItem(PIN_KEY, pin);
-    setHasPin(pin.length === PIN_LENGTH);
+    const pinSet = pin.length === PIN_LENGTH;
+    setHasPin(pinSet);
+    hasPinRef.current = pinSet;
   }, []);
 
   const clearPin = useCallback(() => {
     localStorage.removeItem(PIN_KEY);
     setHasPin(false);
+    hasPinRef.current = false;
   }, []);
 
   const setBiometrics = useCallback((v: boolean) => {
@@ -181,12 +200,41 @@ export function LockProvider({ children }: { children: React.ReactNode }) {
     setHasBiometricCredential(v);
   }, []);
 
+  // If no PIN is set, skip verification and call onSuccess immediately
+  const requestVerification = useCallback((
+    label: string,
+    onSuccess: () => void,
+    onCancel?: () => void,
+  ) => {
+    if (!hasPinRef.current) {
+      onSuccess();
+      return;
+    }
+    setVerificationRequest({ label, onSuccess, onCancel });
+  }, []);
+
+  const resolveVerification = useCallback(() => {
+    setVerificationRequest((req) => {
+      req?.onSuccess();
+      return null;
+    });
+  }, []);
+
+  const cancelVerification = useCallback(() => {
+    setVerificationRequest((req) => {
+      req?.onCancel?.();
+      return null;
+    });
+  }, []);
+
   return (
     <LockContext.Provider value={{
       isLocked, hasPin, biometricsEnabled, hasBiometricCredential,
+      verificationRequest,
       unlock, lock, markFreshLogin,
       getPin, setPin, clearPin,
       setBiometrics, setBiometricCredential,
+      requestVerification, resolveVerification, cancelVerification,
     }}>
       {children}
     </LockContext.Provider>
