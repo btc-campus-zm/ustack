@@ -77,6 +77,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback((accessToken: string, refreshToken: string, user: AuthUser) => {
     localStorage.setItem(STORAGE_KEY_TOKEN, accessToken);
     localStorage.setItem(STORAGE_KEY_REFRESH, refreshToken);
+    // Mark as fresh login so lock screen is skipped this session
+    sessionStorage.setItem("ustack_fresh_login", "1");
     setState((s) => ({ ...s, user, token: accessToken, refreshToken, loading: false }));
     getMe({ data: { token: accessToken } }).then((data) => {
       setState((s) => ({ ...s, profile: data.profile as AuthProfile }));

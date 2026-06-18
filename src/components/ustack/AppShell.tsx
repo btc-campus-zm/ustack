@@ -17,6 +17,7 @@ import { VaultDetailSheet } from "./sheets/VaultDetailSheet";
 import { SettingsSheet } from "./sheets/SettingsSheet";
 import { HelpSheet } from "./sheets/HelpSheet";
 import { EditProfileSheet } from "./sheets/EditProfileSheet";
+import { SecuritySheet } from "./sheets/SecuritySheet";
 import { useAuth } from "@/lib/context/auth-context";
 import { useBtcPrice } from "@/lib/hooks/useAppData";
 import type { Vault } from "@/lib/ustack-data";
@@ -32,7 +33,8 @@ export type SheetKind =
   | "vaultDetail"
   | "settings"
   | "help"
-  | "editProfile";
+  | "editProfile"
+  | "security";
 
 export function AppShell() {
   const nav = useNavigate();
@@ -156,9 +158,10 @@ export function AppShell() {
           onDeposit={() => { setSheet(null); setTimeout(() => openDeposit(activeVault!), 120); }}
           onWithdraw={() => { setSheet(null); setTimeout(() => openWithdraw(activeVault!), 120); }}
         />
-        <SettingsSheet open={sheet === "settings"} onClose={() => setSheet(null)} />
+        <SettingsSheet open={sheet === "settings"} onClose={() => setSheet(null)} onSecurity={() => setSheet("security")} />
         <HelpSheet open={sheet === "help"} onClose={() => setSheet(null)} />
         <EditProfileSheet open={sheet === "editProfile"} onClose={() => setSheet(null)} />
+        <SecuritySheet open={sheet === "security"} onClose={() => setSheet(null)} />
       </div>
     </div>
   );

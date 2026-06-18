@@ -10,6 +10,8 @@ import {
 import { ThemeProvider } from "@/lib/theme-context";
 import { AuthProvider } from "@/lib/context/auth-context";
 import { CurrencyProvider } from "@/lib/currency-context";
+import { LockProvider } from "@/lib/context/lock-context";
+import { LockScreen } from "@/components/ustack/LockScreen";
 
 import appCss from "../styles.css?url";
 
@@ -119,7 +121,10 @@ function RootComponent() {
       <CurrencyProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <Outlet />
+            <LockProvider>
+              <Outlet />
+              <LockScreen />
+            </LockProvider>
           </AuthProvider>
         </QueryClientProvider>
       </CurrencyProvider>
