@@ -23,7 +23,7 @@ function Welcome() {
           <div className="mt-3 text-sm font-medium tracking-wide text-muted-foreground">UStack</div>
         </div>
 
-        <div className="relative flex-1 flex flex-col justify-center">
+        <div className="relative flex-1 flex flex-col justify-center items-center text-center">
           <motion.h1
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
