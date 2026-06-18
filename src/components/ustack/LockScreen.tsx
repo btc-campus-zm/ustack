@@ -1,24 +1,28 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Fingerprint, Delete, KeyRound, Sparkles } from "lucide-react";
 import { useLock, verifyBiometric, PIN_LENGTH } from "@/lib/context/lock-context";
 
 const DEMO_PIN = "1234";
 
-function isDemoMode() {
-  if (typeof window === "undefined") return false;
-  return new URLSearchParams(window.location.search).get("demo") === "lock";
-}
-
 type View = "fingerprint" | "pin";
 
 export function LockScreen() {
   const { isLocked, hasPin, biometricsEnabled, hasBiometricCredential, unlock, getPin } = useLock();
-  const [demo] = useState(isDemoMode);
 
-  // Start on fingerprint view if bio is available, otherwise go straight to PIN
-  const hasBio = demo || (biometricsEnabled && hasBiometricCredential);
-  const [view, setView] = useState<View>(hasBio ? "fingerprint" : "pin");
+  // Initialise after mount only — avoids SSR/client hydration mismatch
+  const [demo, setDemo] = useState(false);
+  const [view, setView] = useState<View>("fingerprint");
+  const mounted = useRef(false);
+
+  useEffect(() => {
+    if (mounted.current) return;
+    mounted.current = true;
+    const isDemo = new URLSearchParams(window.location.search).get("demo") === "lock";
+    setDemo(isDemo);
+    const hasBioNow = isDemo || (biometricsEnabled && hasBiometricCredential);
+    setView(hasBioNow ? "fingerprint" : "pin");
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [pin, setPin] = useState("");
   const [pinError, setPinError] = useState("");
