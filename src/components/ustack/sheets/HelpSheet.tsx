@@ -20,7 +20,7 @@ const faqs = [
   },
   {
     q: "How are my sats stored?",
-    a: "UStack is non-custodial. Your keys are yours. We never hold your funds. We just make the saving experience clean and disciplined.",
+    a: "Your sats are held securely through the UStack platform. We make the saving experience clean, disciplined, and always in your control.",
   },
   {
     q: "What payment methods are supported?",
@@ -122,7 +122,7 @@ export function HelpSheet({ open, onClose }: { open: boolean; onClose: () => voi
 
           <div className="flex flex-col gap-2">
             {[
-              { icon: Shield, title: "Non-custodial", body: "Your keys. Your coins. We never hold your funds.", color: "oklch(0.82 0.17 140)" },
+              { icon: Shield, title: "Secure by design", body: "Your savings are protected with biometric and PIN security.", color: "oklch(0.82 0.17 140)" },
               { icon: Lock, title: "Privacy first", body: "Minimal data collection. No selling your information.", color: "oklch(0.86 0.13 160)" },
               { icon: Zap, title: "Lightning fast", body: "Instant Lightning Network deposits and withdrawals.", color: "oklch(0.74 0.18 55)" },
               { icon: Info, title: "Open building", body: "Made in Zambia. Africa-native Bitcoin savings.", color: "oklch(0.73 0.19 55)" },

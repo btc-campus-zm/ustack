@@ -114,7 +114,7 @@ function Auth() {
 
                 <div className="mt-6 grid grid-cols-3 gap-2">
                   {[
-                    { icon: ShieldCheck, label: "Non-custodial" },
+                    { icon: ShieldCheck, label: "Secure" },
                     { icon: Bitcoin, label: "Bitcoin only" },
                     { icon: Fingerprint, label: "Biometric" },
                   ].map(({ icon: Icon, label }) => (
