@@ -83,7 +83,9 @@ export function LockScreen() {
               <span className="text-primary-foreground text-3xl font-black">U</span>
             </div>
             <div className="text-xl font-bold mt-1">UStack</div>
-            <div className="text-sm text-muted-foreground">Enter your PIN to continue</div>
+            <div className="text-sm text-muted-foreground">
+              {showBio ? "Use fingerprint or enter your PIN" : "Enter your PIN to continue"}
+            </div>
           </div>
 
           {/* PIN dots */}
